@@ -42,7 +42,7 @@ type observerVec interface {
 type listenPacket func(network, address string) (net.PacketConn, error)
 
 // NewPinger returns a new instance of pinger
-func NewPinger(ip *net.IPAddr, obs observerVec, inteval, timeout time.Duration) (Pinger, error) {
+func NewPinger(ip *net.IPAddr, obs observerVec, interval, timeout time.Duration) (Pinger, error) {
 	p := pinger{
 		obs: obs,
 		listen: func(network, address string) (net.PacketConn, error) {
@@ -50,7 +50,7 @@ func NewPinger(ip *net.IPAddr, obs observerVec, inteval, timeout time.Duration) 
 		},
 	}
 
-	p.sndTicker = time.NewTicker(inteval)
+	p.sndTicker = time.NewTicker(interval)
 	p.timeout = timeout
 
 	p.addr = net.UDPAddr{

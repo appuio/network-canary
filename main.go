@@ -57,7 +57,7 @@ func main() {
 		IPTargets:      *ipTargets,
 		UpdateInterval: *update,
 		PingInterval:   *interval,
-		PingTimout:     *timeout,
+		PingTimeout:    *timeout,
 	})
 	go func() {
 		err := m.Run(ctx)

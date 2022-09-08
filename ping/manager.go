@@ -57,7 +57,7 @@ type ManagerConfig struct {
 
 	UpdateInterval time.Duration
 	PingInterval   time.Duration
-	PingTimout     time.Duration
+	PingTimeout    time.Duration
 }
 
 // NewManager returns a new instance of a ping Manager
@@ -77,7 +77,7 @@ func NewManager(hist *prometheus.HistogramVec, conf ManagerConfig) *Manager {
 		ipTargets:  conf.IPTargets,
 
 		pingInterval: conf.PingInterval,
-		pingTimout:   conf.PingTimout,
+		pingTimout:   conf.PingTimeout,
 	}
 }
 
