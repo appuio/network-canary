@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net"
 	"sync"
 	"time"
@@ -56,7 +57,8 @@ func NewPinger(ip *net.IPAddr, obs observerVec, inteval, timeout time.Duration) 
 		IP:   ip.IP,
 		Zone: ip.Zone,
 	}
-	p.seq = 1
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	p.seq = r.Intn(1 << 16)
 
 	return &p, nil
 }
@@ -130,7 +132,7 @@ func (p *pinger) receive(ctx context.Context) error {
 		if _, ok := p.inflight.LoadAndDelete(res.Seq); ok {
 			received := now()
 			sent := time.UnixMicro(int64(binary.BigEndian.Uint64(res.Data)))
-			l.V(2).Info("got reflection", "id", res.ID, "seq", res.Seq, "sent", sent, "received", received, "latency", received.Sub(sent))
+			l.V(1).Info("got reflection", "id", res.ID, "seq", res.Seq, "sent", sent, "received", received, "latency", received.Sub(sent))
 			p.obs.WithLabelValues("completed").Observe(received.Sub(sent).Seconds())
 			p.inflight.Delete(res.Seq)
 		}
