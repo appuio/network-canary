@@ -31,8 +31,8 @@ type pinger struct {
 
 	obs observerVec
 
-	sndTicker *time.Ticker
-	timeout   time.Duration
+	interval time.Duration
+	timeout  time.Duration
 }
 
 type observerVec interface {
@@ -50,7 +50,7 @@ func NewPinger(ip *net.IPAddr, obs observerVec, interval, timeout time.Duration)
 		},
 	}
 
-	p.sndTicker = time.NewTicker(interval)
+	p.interval = interval
 	p.timeout = timeout
 
 	p.addr = net.UDPAddr{
@@ -65,6 +65,12 @@ func NewPinger(ip *net.IPAddr, obs observerVec, interval, timeout time.Duration)
 
 // Ping will continuously ping the configured target until the context is cancled
 func (p *pinger) Ping(ctx context.Context) error {
+	t := time.NewTicker(p.interval)
+	defer t.Stop()
+	return p.pingWithTicker(ctx, t)
+}
+
+func (p *pinger) pingWithTicker(ctx context.Context, t *time.Ticker) error {
 	l := logr.FromContextOrDiscard(ctx).WithValues("target", p.addr.String())
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -86,7 +92,7 @@ func (p *pinger) Ping(ctx context.Context) error {
 
 	for {
 		select {
-		case <-p.sndTicker.C:
+		case <-t.C:
 			err := p.ping()
 			if err != nil {
 				l.Error(err, "Pinger failed")

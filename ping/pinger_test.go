@@ -35,17 +35,16 @@ func TestPing(t *testing.T) {
 		addr: net.UDPAddr{
 			IP: net.ParseIP("10.2.0.1"),
 		},
-		inflight:  sync.Map{},
-		obs:       mockObs,
-		seq:       1,
-		sndTicker: mockTime.ticker(),
-		timeout:   5 * time.Second,
+		inflight: sync.Map{},
+		obs:      mockObs,
+		seq:      1,
+		timeout:  5 * time.Second,
 	}
 	now = mockTime.get
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go func() {
-		err := p.Ping(ctx)
+		err := p.pingWithTicker(ctx, mockTime.ticker())
 		require.NoError(t, err)
 	}()
 

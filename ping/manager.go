@@ -17,8 +17,8 @@ type Manager struct {
 
 	pingCtxs map[string]Context
 
-	ticker *time.Ticker
-	hist   observerCurrier
+	updateInterval time.Duration
+	hist           observerCurrier
 
 	pingInterval time.Duration
 	pingTimout   time.Duration
@@ -65,8 +65,8 @@ func NewManager(hist *prometheus.HistogramVec, conf ManagerConfig) *Manager {
 	return &Manager{
 		source: conf.Source,
 
-		ticker: time.NewTicker(conf.UpdateInterval),
-		hist:   hist,
+		updateInterval: conf.UpdateInterval,
+		hist:           hist,
 
 		newPinger: NewPinger,
 		lookupIP:  net.LookupIP,
@@ -85,11 +85,13 @@ func NewManager(hist *prometheus.HistogramVec, conf ManagerConfig) *Manager {
 // This will block until the context is canceled
 func (m *Manager) Run(ctx context.Context) error {
 	l := logr.FromContextOrDiscard(ctx)
+	ticker := time.NewTicker(m.updateInterval)
+	defer ticker.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-m.ticker.C:
+		case <-ticker.C:
 			err := m.schedulePingers(ctx)
 			// We don't want to fail if DNS disappears, just log and move on.
 			if err != nil {
