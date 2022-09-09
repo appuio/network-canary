@@ -25,7 +25,7 @@ type pinger struct {
 	listen listenPacket
 
 	addr net.UDPAddr
-	seq  int
+	seq  uint16
 
 	inflight sync.Map
 
@@ -58,7 +58,7 @@ func NewPinger(ip *net.IPAddr, obs observerVec, interval, timeout time.Duration)
 		Zone: ip.Zone,
 	}
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	p.seq = r.Intn(1 << 16)
+	p.seq = uint16(r.Intn(1 << 16))
 
 	return &p, nil
 }
@@ -135,7 +135,7 @@ func (p *pinger) receive(ctx context.Context) error {
 			return nil
 		}
 
-		if _, ok := p.inflight.LoadAndDelete(res.Seq); ok {
+		if _, ok := p.inflight.LoadAndDelete(uint16(res.Seq)); ok {
 			received := now()
 			sent := time.UnixMicro(int64(binary.BigEndian.Uint64(res.Data)))
 			l.V(1).Info("got reflection", "id", res.ID, "seq", res.Seq, "sent", sent, "received", received, "latency", received.Sub(sent))
@@ -152,7 +152,7 @@ func (p *pinger) ping() error {
 
 	e := icmp.Echo{
 		ID:   0, // Ignored for unpriv ICMP sockets
-		Seq:  p.seq,
+		Seq:  int(p.seq),
 		Data: ts,
 	}
 	msg := icmp.Message{
