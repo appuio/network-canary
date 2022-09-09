@@ -1,13 +1,7 @@
-FROM docker.io/library/alpine:3.16 as runtime
+FROM gcr.io/distroless/static:nonroot
 
-RUN \
-  apk add --update --no-cache \
-    bash \
-    curl \
-    ca-certificates \
-    tzdata
+WORKDIR /
+COPY network-canary canary
+USER 65532:65532
 
-ENTRYPOINT ["network-canary"]
-COPY network-canary /usr/bin/
-
-USER 65536:0
+CMD ["/canary"]
