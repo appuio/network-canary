@@ -140,7 +140,6 @@ func (p *pinger) receive(ctx context.Context) error {
 			sent := time.UnixMicro(int64(binary.BigEndian.Uint64(res.Data)))
 			l.V(1).Info("got reflection", "id", res.ID, "seq", res.Seq, "sent", sent, "received", received, "latency", received.Sub(sent))
 			p.obs.WithLabelValues("completed").Observe(received.Sub(sent).Seconds())
-			p.inflight.Delete(res.Seq)
 		}
 	}
 }
