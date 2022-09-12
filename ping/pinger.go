@@ -164,10 +164,11 @@ func (p *pinger) ping() error {
 		return fmt.Errorf("Failed to marshal ICMP packet: %w", err)
 	}
 
+	p.inflight.Store(p.seq, sent)
 	if _, err := p.conn.WriteTo(msgB, &p.addr); err != nil {
+		p.inflight.Delete(p.seq)
 		return fmt.Errorf("Failed to send ICMP packet: %w", err)
 	}
-	p.inflight.Store(p.seq, sent)
 	p.seq = p.seq + 1
 	return nil
 }
