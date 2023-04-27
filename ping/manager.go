@@ -102,7 +102,7 @@ func (m *Manager) Run(ctx context.Context) error {
 }
 func (m *Manager) schedulePingers(ctx context.Context) error {
 	l := logr.FromContextOrDiscard(ctx)
-	l.Info("Updating ping targets")
+	l.V(1).Info("Updating ping targets")
 	ips, err := m.lookUpTargets(ctx)
 	if err != nil {
 		return err
