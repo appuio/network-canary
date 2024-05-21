@@ -3,7 +3,7 @@ module github.com/appuio/network-canary
 go 1.19
 
 require (
-	github.com/go-logr/logr v1.2.4
+	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/zapr v1.2.3
 	github.com/prometheus/client_golang v1.15.0
 	github.com/spf13/pflag v1.0.5
